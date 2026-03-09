@@ -66,6 +66,16 @@ header{border-bottom:1px solid var(--border);padding:17px 0;
 .kpi.cp .kpi-val{color:var(--purple)}.kpi.cc .kpi-val{color:var(--cyan)}
 .kpi-sub{font-size:.68rem;color:var(--muted)}
 
+/* KPI icon */
+.kpi-icon{position:absolute;top:16px;right:16px;opacity:0.55}
+.kpi-icon svg{width:22px;height:22px}
+.kpi.cb .kpi-icon{color:var(--blue)}
+.kpi.cg .kpi-icon{color:var(--green)}
+.kpi.cr .kpi-icon{color:var(--red)}
+.kpi.co .kpi-icon{color:var(--gold)}
+.kpi.cp .kpi-icon{color:var(--purple)}
+.kpi.cc .kpi-icon{color:var(--cyan)}
+
 /* OVERVIEW LAYOUT */
 .ov-row{display:grid;grid-template-columns:260px 1fr;gap:18px;margin-bottom:32px;align-items:start}
 .ring-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;
@@ -167,7 +177,7 @@ td{padding:12px 15px;font-size:.78rem;vertical-align:middle}
   z-index:300;display:none;align-items:center;justify-content:center;padding:20px}
 .overlay.open{display:flex}
 .modal{background:var(--s1);border:1px solid var(--border);border-radius:15px;padding:30px;
-  width:100%;max-width:520px;max-height:90vh;overflow-y:auto;position:relative}
+  width:100%;max-width:560px;max-height:90vh;overflow-y:auto;position:relative}
 .mx{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);
   cursor:pointer;font-size:1rem;transition:color .14s;padding:5px}
 .mx:hover{color:var(--text)}
@@ -184,6 +194,19 @@ td{padding:12px 15px;font-size:.78rem;vertical-align:middle}
 .fi textarea{resize:vertical;min-height:60px}
 .ma{display:flex;gap:9px;justify-content:flex-end;margin-top:20px;
   padding-top:17px;border-top:1px solid var(--border)}
+
+/* Modal payments list */
+.mpay-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.mpay-row{display:flex;align-items:center;justify-content:space-between;background:var(--s3);border-radius:7px;padding:8px 12px;gap:8px}
+.mpay-info{display:flex;gap:10px;align-items:center;flex:1;flex-wrap:wrap}
+.mpay-date{font-family:'DM Mono',monospace;font-size:.68rem;color:var(--muted2)}
+.mpay-amt{font-family:'DM Mono',monospace;font-size:.78rem;font-weight:500;color:var(--green)}
+.mpay-acct{font-size:.65rem;color:var(--muted)}
+.no-pays{font-size:.74rem;color:var(--muted);text-align:center;padding:12px}
+.pay-section-title{font-size:.65rem;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin:16px 0 8px;display:flex;align-items:center;gap:8px}
+.pay-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.add-pay-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end}
+@media(max-width:600px){.add-pay-row{grid-template-columns:1fr 1fr}}
 
 /* TOAST */
 .toast{position:fixed;bottom:26px;right:26px;background:var(--s2);border:1px solid var(--border);
@@ -252,9 +275,9 @@ td{padding:12px 15px;font-size:.78rem;vertical-align:middle}
 
 <div class="wrap">
   <div class="tabs">
-    <button class="tab active" data-page="dashboard" onclick="showPage(this)">Dashboard</button>
-    <button class="tab" data-page="clientes" onclick="showPage(this)">Por cliente</button>
-    <button class="tab" data-page="pagos" onclick="showPage(this)">Pagos</button>
+    <button class="tab active" data-page="dashboard" onclick="showPage(this)">◈ Dashboard</button>
+    <button class="tab" data-page="clientes" onclick="showPage(this)">⊞ Por cliente</button>
+    <button class="tab" data-page="pagos" onclick="showPage(this)">≡ Pagos</button>
   </div>
 
   <!-- DASHBOARD -->
@@ -325,7 +348,7 @@ td{padding:12px 15px;font-size:.78rem;vertical-align:middle}
   <div class="modal">
     <button class="mx" onclick="closeModal()">✕</button>
     <div class="mt" id="mTitle">Nuevo registro</div>
-    <div class="ms">Completa los datos del pago</div>
+    <div class="ms" id="ms">Completa los datos del nuevo pago</div>
     <div class="fg">
       <div class="fi"><label>Cliente *</label>
         <select id="mCli">
@@ -337,13 +360,17 @@ td{padding:12px 15px;font-size:.78rem;vertical-align:middle}
       <div class="fi"><label>Ref. Factura</label><input type="text" id="mFac" placeholder="FAC-001"></div>
       <div class="fi"><label>Fecha Factura</label><input type="date" id="mFecFac"></div>
       <div class="fi"><label>Monto a Pagar *</label><input type="number" id="mPagar" placeholder="0.00" step="0.01"></div>
-      <div class="fi"><label>Fecha de Pago</label><input type="date" id="mFecPago"></div>
-      <div class="fi"><label>Monto Pagado</label><input type="number" id="mPagado" placeholder="0.00" step="0.01"></div>
-      <div class="fi"><label>Cuenta bancaria</label><input type="text" id="mCuenta" placeholder="Banco / cuenta"></div>
-      <div class="fi"><label>Estatus</label>
-        <select id="mEst"><option>Pendiente</option><option>Pagado</option><option>Parcial</option></select>
-      </div>
       <div class="fi full"><label>Observaciones</label><textarea id="mObs" placeholder="Notas…"></textarea></div>
+    </div>
+    <!-- Payment management section -->
+    <div class="pay-section-title">Pagos registrados</div>
+    <div class="mpay-list" id="mPayList"><div class="no-pays">Sin pagos</div></div>
+    <div class="pay-section-title">Agregar pago</div>
+    <div class="add-pay-row">
+      <div class="fi"><label>Fecha</label><input type="date" id="mFecPago"></div>
+      <div class="fi"><label>Monto</label><input type="number" id="mPagado" placeholder="0.00" step="0.01"></div>
+      <div class="fi"><label>Cuenta</label><input type="text" id="mCuenta" placeholder="Banco / cuenta"></div>
+      <button class="btn btn-p" onclick="addModalPay()" style="margin-bottom:0">+ Agregar</button>
     </div>
     <div class="ma">
       <button class="btn btn-gh" onclick="closeModal()">Cancelar</button>
@@ -362,7 +389,6 @@ const GRADS={Efectivo:'gc',Cahen:'gb',Vitatech:'gg',Coreligix:'gp','EPI Sofom':'
 function cc(n){return COLORS[n]||'#94a3b8';}
 
 // ── SEED (from Excel) ─────────────────────────────────────────────────────
-// Clientes con misma empresa pero DISTINTA fecha_factura → registro separado
 const SEED=[
   {id:'R001',cliente:'Efectivo',factura:'FAC-EFE-01',fecha_factura:'2025-12-20',monto_pagar:200000,
     pagos:[{id:'P001',fecha:'2025-01-28',monto:200000,cuenta:'Caja',obs:''}],obs:''},
@@ -381,10 +407,8 @@ const SEED=[
     pagos:[],obs:'Sin pagos registrados'},
   {id:'R005',cliente:'EPI Sofom',factura:'FAC-EPI-01',fecha_factura:'2025-12-20',monto_pagar:200000,
     pagos:[],obs:''},
-  // Cahen — factura feb 2026 (fecha diferente → registro separado)
   {id:'R006',cliente:'Cahen',factura:'FAC-CAH-02',fecha_factura:'2026-02-12',monto_pagar:664900,
     pagos:[],obs:'Factura feb 2026'},
-  // Vitatech — factura feb 2026 (fecha diferente → registro separado)
   {id:'R007',cliente:'Vitatech',factura:'FAC-VIT-02',fecha_factura:'2026-02-12',monto_pagar:1186973,
     pagos:[],obs:'Factura feb 2026'},
 ];
@@ -393,11 +417,11 @@ const SK='cpagos_v3';
 function ld(){try{const r=localStorage.getItem(SK);if(r)return JSON.parse(r);}catch(e){}return JSON.parse(JSON.stringify(SEED));}
 function sv(d){try{localStorage.setItem(SK,JSON.stringify(d));}catch(e){}}
 
-let data=ld(), editId=null;
+let data=ld();
 
 // ── UTILS ─────────────────────────────────────────────────────────────────
-const CIRC_L=2*Math.PI*61; // large ring r=61
-const CIRC_S=2*Math.PI*34; // small ring r=34
+const CIRC_L=2*Math.PI*61;
+const CIRC_S=2*Math.PI*34;
 
 function fmt(n){if(n===null||n===undefined)return'—';return'$'+Number(n).toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0});}
 function fmtD(d){if(!d)return'—';try{const[y,m,dd]=d.split('-');const ms=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];return`${parseInt(dd)} ${ms[parseInt(m)-1]} ${y}`;}catch(e){return d;}}
@@ -412,6 +436,14 @@ function h2rgb(hex){
   const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
   return `${r},${g},${b}`;
 }
+
+// ── SVG ICONS ─────────────────────────────────────────────────────────────
+const ICON_INVOICE=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>`;
+const ICON_CHECK=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`;
+const ICON_CLOCK=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`;
+const ICON_TREND=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/></svg>`;
+const ICON_USERS=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>`;
+const ICON_ACTIVITY=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>`;
 
 // ── DATE CHIP ─────────────────────────────────────────────────────────────
 function updateDate(){
@@ -443,14 +475,43 @@ function renderDashboard(){
   const uniqueCli=[...new Set(data.map(r=>r.cliente))].length;
 
   document.getElementById('kpiGrid').innerHTML=`
-    <div class="kpi cb"><div class="kpi-lbl">Total a cobrar</div><div class="kpi-val">${fmt(tp)}</div><div class="kpi-sub">${data.length} registros</div></div>
-    <div class="kpi cg"><div class="kpi-lbl">Total cobrado</div><div class="kpi-val">${fmt(tpd)}</div><div class="kpi-sub">${nDone} completados</div></div>
-    <div class="kpi cr"><div class="kpi-lbl">Saldo pendiente</div><div class="kpi-val">${fmt(tpn)}</div><div class="kpi-sub">${nPend} sin pagar</div></div>
-    <div class="kpi co"><div class="kpi-lbl">Avance global</div><div class="kpi-val">${p.toFixed(1)}%</div><div class="kpi-sub">${nPar} parciales</div></div>
-    <div class="kpi cp"><div class="kpi-lbl">Clientes únicos</div><div class="kpi-val">${uniqueCli}</div><div class="kpi-sub">en seguimiento</div></div>
-    <div class="kpi cc"><div class="kpi-lbl">Transacciones</div><div class="kpi-val">${allPayments}</div><div class="kpi-sub">pagos registrados</div></div>`;
+    <div class="kpi cb">
+      <div class="kpi-icon">${ICON_INVOICE}</div>
+      <div class="kpi-lbl">Total a cobrar</div>
+      <div class="kpi-val">${fmt(tp)}</div>
+      <div class="kpi-sub">${data.length} registros</div>
+    </div>
+    <div class="kpi cg">
+      <div class="kpi-icon">${ICON_CHECK}</div>
+      <div class="kpi-lbl">Total cobrado</div>
+      <div class="kpi-val">${fmt(tpd)}</div>
+      <div class="kpi-sub">${nDone} completados</div>
+    </div>
+    <div class="kpi cr">
+      <div class="kpi-icon">${ICON_CLOCK}</div>
+      <div class="kpi-lbl">Saldo pendiente</div>
+      <div class="kpi-val">${fmt(tpn)}</div>
+      <div class="kpi-sub">${nPend} sin pagar</div>
+    </div>
+    <div class="kpi co">
+      <div class="kpi-icon">${ICON_TREND}</div>
+      <div class="kpi-lbl">Avance global</div>
+      <div class="kpi-val">${p.toFixed(1)}%</div>
+      <div class="kpi-sub">${nPar} parciales</div>
+    </div>
+    <div class="kpi cp">
+      <div class="kpi-icon">${ICON_USERS}</div>
+      <div class="kpi-lbl">Clientes únicos</div>
+      <div class="kpi-val">${uniqueCli}</div>
+      <div class="kpi-sub">en seguimiento</div>
+    </div>
+    <div class="kpi cc">
+      <div class="kpi-icon">${ICON_ACTIVITY}</div>
+      <div class="kpi-lbl">Transacciones</div>
+      <div class="kpi-val">${allPayments}</div>
+      <div class="kpi-sub">pagos registrados</div>
+    </div>`;
 
-  // Main ring
   const ring=document.getElementById('mainRing');
   ring.style.strokeDasharray=CIRC_L;
   ring.style.strokeDashoffset=CIRC_L;
@@ -468,7 +529,6 @@ function renderDashboard(){
     <div class="os"><div class="os-l">Parciales</div><div class="os-v" style="color:var(--gold)">${nPar}</div></div>
     <div class="os"><div class="os-l">% pendiente</div><div class="os-v" style="color:var(--red)">${tp>0?((tpn/tp)*100).toFixed(1):0}%</div></div>`;
 
-  // Bars — group by cliente (all records of same client combined for bar overview)
   const clients=[...new Set(data.map(r=>r.cliente))];
   let barsHtml='';
   for(const cli of clients){
@@ -587,64 +647,110 @@ function renderTable(){
 }
 
 // ── MODAL ─────────────────────────────────────────────────────────────────
-function openModal(id=null){
-  editId=id;
-  document.getElementById('mTitle').textContent=id?'Editar registro':'Nuevo registro';
-  if(id){
-    const r=data.find(x=>x.id===id);
-    if(r){
-      document.getElementById('mCli').value=r.cliente;
-      document.getElementById('mFac').value=r.factura;
-      document.getElementById('mFecFac').value=r.fecha_factura;
-      document.getElementById('mPagar').value=r.monto_pagar;
-      const lp=r.pagos[r.pagos.length-1];
-      document.getElementById('mFecPago').value=lp?lp.fecha:'';
-      document.getElementById('mPagado').value=lp?lp.monto:'';
-      document.getElementById('mCuenta').value=lp?lp.cuenta:'';
-      document.getElementById('mEst').value=status(r);
-      document.getElementById('mObs').value=r.obs;
+let editId = null;
+let modalPayments = [];
+
+function openModal(id = null) {
+  editId = id;
+  document.getElementById('mTitle').textContent = id ? 'Editar registro' : 'Nuevo registro';
+  document.getElementById('ms').textContent = id ? 'Modifica los datos del registro' : 'Completa los datos del nuevo pago';
+  modalPayments = [];
+
+  if (id) {
+    const r = data.find(x => x.id === id);
+    if (r) {
+      document.getElementById('mCli').value = r.cliente;
+      document.getElementById('mFac').value = r.factura;
+      document.getElementById('mFecFac').value = r.fecha_factura;
+      document.getElementById('mPagar').value = r.monto_pagar;
+      document.getElementById('mObs').value = r.obs;
+      modalPayments = JSON.parse(JSON.stringify(r.pagos));
     }
   } else {
-    ['mCli','mFac','mFecFac','mPagar','mFecPago','mPagado','mCuenta','mObs'].forEach(i=>document.getElementById(i).value='');
-    document.getElementById('mEst').value='Pendiente';
+    ['mCli','mFac','mFecFac','mPagar','mObs'].forEach(i => document.getElementById(i).value = '');
   }
+
+  ['mFecPago','mPagado','mCuenta'].forEach(i => document.getElementById(i).value = '');
+  renderModalPayments();
   document.getElementById('ov').classList.add('open');
 }
-function closeModal(){document.getElementById('ov').classList.remove('open');editId=null;}
-document.getElementById('ov').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
 
-function saveReg(){
-  const cli=document.getElementById('mCli').value;
-  const mp=parseFloat(document.getElementById('mPagar').value)||0;
-  if(!cli){toast('El cliente es obligatorio.','terr');return;}
-  const fechaPago=document.getElementById('mFecPago').value;
-  const montoPagado=parseFloat(document.getElementById('mPagado').value)||0;
-  const cuenta=document.getElementById('mCuenta').value;
+function closeModal(){
+  document.getElementById('ov').classList.remove('open');
+  editId = null;
+  modalPayments = [];
+}
 
-  if(editId){
-    const idx=data.findIndex(r=>r.id===editId);
-    if(idx>-1){
-      data[idx].cliente=cli;
-      data[idx].factura=document.getElementById('mFac').value;
-      data[idx].fecha_factura=document.getElementById('mFecFac').value;
-      data[idx].monto_pagar=mp;
-      data[idx].obs=document.getElementById('mObs').value;
-      if(fechaPago&&montoPagado>0){
-        const maxN=data.flatMap(r=>r.pagos).reduce((m,p)=>{const n=parseInt(p.id.replace('P',''))||0;return n>m?n:m;},0);
-        data[idx].pagos.push({id:'P'+String(maxN+1).padStart(3,'0'),fecha:fechaPago,monto:montoPagado,cuenta,obs:''});
-      }
-      data[idx].estatus=status(data[idx]);
+document.getElementById('ov').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+function renderModalPayments() {
+  const list = document.getElementById('mPayList');
+  if (!modalPayments.length) {
+    list.innerHTML = '<div class="no-pays">Sin pagos registrados</div>';
+    return;
+  }
+  list.innerHTML = modalPayments.map((p, i) => `
+    <div class="mpay-row">
+      <div class="mpay-info">
+        <span class="mpay-date">${fmtD(p.fecha)}</span>
+        <span class="mpay-amt">${fmt(p.monto)}</span>
+        <span class="mpay-acct">${p.cuenta || '—'}</span>
+      </div>
+      <button class="btn bsm bdel" onclick="removeModalPay(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function removeModalPay(i) {
+  modalPayments.splice(i, 1);
+  renderModalPayments();
+}
+
+function addModalPay() {
+  const fecha = document.getElementById('mFecPago').value;
+  const monto = parseFloat(document.getElementById('mPagado').value) || 0;
+  const cuenta = document.getElementById('mCuenta').value;
+  if (!fecha || monto <= 0) { toast('Ingresa fecha y monto válidos.', 'terr'); return; }
+
+  const allPays = [...data.flatMap(r => r.pagos), ...modalPayments];
+  const maxP = allPays.reduce((m, p) => { const n = parseInt((p.id || '').replace('P', '')) || 0; return n > m ? n : m; }, 0);
+
+  modalPayments.push({ id: 'P' + String(maxP + 1).padStart(3, '0'), fecha, monto, cuenta, obs: '' });
+  ['mFecPago','mPagado','mCuenta'].forEach(i => document.getElementById(i).value = '');
+  renderModalPayments();
+  toast('Pago agregado.', 'tok');
+}
+
+function saveReg() {
+  const cli = document.getElementById('mCli').value;
+  const mp = parseFloat(document.getElementById('mPagar').value) || 0;
+  if (!cli) { toast('El cliente es obligatorio.', 'terr'); return; }
+  if (mp <= 0) { toast('El monto a pagar debe ser mayor a 0.', 'terr'); return; }
+
+  if (editId) {
+    const idx = data.findIndex(r => r.id === editId);
+    if (idx > -1) {
+      data[idx].cliente = cli;
+      data[idx].factura = document.getElementById('mFac').value;
+      data[idx].fecha_factura = document.getElementById('mFecFac').value;
+      data[idx].monto_pagar = mp;
+      data[idx].obs = document.getElementById('mObs').value;
+      data[idx].pagos = modalPayments;
     }
-    toast('Registro actualizado.','tok');
+    toast('Registro actualizado.', 'tok');
   } else {
-    const maxR=data.reduce((m,r)=>{const n=parseInt(r.id.replace('R',''))||0;return n>m?n:m;},0);
-    const maxP=data.flatMap(r=>r.pagos).reduce((m,p)=>{const n=parseInt(p.id.replace('P',''))||0;return n>m?n:m;},0);
-    const pagos=[];
-    if(fechaPago&&montoPagado>0) pagos.push({id:'P'+String(maxP+1).padStart(3,'0'),fecha:fechaPago,monto:montoPagado,cuenta,obs:''});
-    const nr={id:'R'+String(maxR+1).padStart(3,'0'),cliente:cli,factura:document.getElementById('mFac').value,
-      fecha_factura:document.getElementById('mFecFac').value,monto_pagar:mp,pagos,obs:document.getElementById('mObs').value,estatus:'Pendiente'};
-    nr.estatus=status(nr); data.push(nr);
-    toast('Registro creado.','tok');
+    const maxR = data.reduce((m, r) => { const n = parseInt(r.id.replace('R', '')) || 0; return n > m ? n : m; }, 0);
+    const nr = {
+      id: 'R' + String(maxR + 1).padStart(3, '0'),
+      cliente: cli,
+      factura: document.getElementById('mFac').value,
+      fecha_factura: document.getElementById('mFecFac').value,
+      monto_pagar: mp,
+      pagos: modalPayments,
+      obs: document.getElementById('mObs').value,
+    };
+    data.push(nr);
+    toast('Registro creado.', 'tok');
   }
   sv(data); closeModal(); renderAll();
 }
