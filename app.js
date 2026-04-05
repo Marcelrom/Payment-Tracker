@@ -376,24 +376,35 @@ function renderDashboard(){
 
     let invoicesHtml='';
     for(const rec of recs){
-      const rtp=rec.monto_pagar, rpd=paid(rec), rpc=rtp>0?(rpd/rtp*100):0, rst=status(rec);
+      const rtp=rec.monto_pagar, rpd=paid(rec), rdis=rtp-rpd, rpc=rtp>0?(rpd/rtp*100):0, rst=status(rec);
       const badgeCol=rst==='Pagado'?'text-[#34d399] bg-[#34d399]/10 border-[#34d399]/20':
                      rst==='Parcial'?'text-[#fbbf24] bg-[#fbbf24]/10 border-[#fbbf24]/20':
                      'text-[#f87171] bg-[#f87171]/10 border-[#f87171]/20';
+      const barCol=rst==='Pagado'?'#34d399':rst==='Parcial'?'#fbbf24':'#f87171';
       invoicesHtml+=`
         <div class="pl-3 border-l-2 border-slate-700/50">
-          <div class="flex justify-between items-center gap-2 mb-1">
-            <div class="flex items-center gap-1.5 min-w-0">
-              <span class="font-mono text-[0.65rem] text-slate-300">${rec.factura}</span>
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mb-2">
+            <div class="flex items-center gap-1.5 min-w-0 flex-1">
+              <span class="font-mono text-[0.68rem] font-semibold text-slate-200">${rec.factura}</span>
               <span class="font-mono text-[0.55rem] px-1.5 py-0.5 rounded border ${badgeCol}">${rst}</span>
             </div>
-            <div class="text-right shrink-0">
-              <span class="font-mono text-[0.62rem] text-slate-400">${fmt(rpd)}</span>
-              <span class="font-mono text-[0.58rem] text-slate-600"> / ${fmt(rtp)}</span>
+            <div class="flex items-center gap-4 shrink-0">
+              <div class="text-center">
+                <div class="font-mono text-[0.52rem] text-slate-500 uppercase tracking-wider mb-0.5">Recurso Inicial</div>
+                <div class="font-mono text-[0.7rem] text-slate-300 font-medium">${fmt(rtp)}</div>
+              </div>
+              <div class="text-center">
+                <div class="font-mono text-[0.52rem] text-slate-500 uppercase tracking-wider mb-0.5">Pagado</div>
+                <div class="font-mono text-[0.7rem] text-[#34d399] font-medium">${fmt(rpd)}</div>
+              </div>
+              <div class="text-center">
+                <div class="font-mono text-[0.52rem] text-slate-500 uppercase tracking-wider mb-0.5">Disponible</div>
+                <div class="font-mono text-[0.7rem] font-medium" style="color:${barCol}">${fmt(rdis)}</div>
+              </div>
             </div>
           </div>
           <div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden mb-2.5">
-            <div class="h-full rounded-full transition-all duration-1000 ease-out" style="width:${rpc}%;background-color:${col};opacity:0.7"></div>
+            <div class="h-full rounded-full transition-all duration-1000 ease-out" style="width:${rpc}%;background-color:${barCol};opacity:0.8"></div>
           </div>
         </div>`;
     }
