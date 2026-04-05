@@ -85,8 +85,9 @@
         <span id="syncMsg">Conectando...</span>
       </div>
       <!-- Pending approval badge (admin only) -->
-      <div id="pendingBadge" class="hidden items-center gap-1.5 font-mono text-[0.65rem] px-2.5 py-1 rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400 cursor-pointer" onclick="showPage(document.querySelector('[data-page=clientes]'))">
-        <span>⏳</span><span id="pendingCount">0</span> pendientes
+      <div id="pendingBadge" class="hidden items-center gap-2 font-mono text-[0.65rem] px-2.5 py-1 rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-400 cursor-pointer" onclick="pendingBadgeClick()">
+        <span>⏳</span>
+        <span id="pendingSummary">0 pendientes</span>
       </div>
       <div id="dchip" class="font-mono text-[0.68rem] text-slate-400 bg-slate-800 border border-slate-700 rounded-md px-2.5 py-1 hidden sm:block">--</div>
       <!-- User menu -->
@@ -275,9 +276,6 @@
         <input type="number" id="mpMonto" placeholder="0.00" step="0.01" class="bg-slate-800 border border-slate-700 rounded-md text-slate-200 text-[0.82rem] px-3 py-2 outline-none focus:border-[#34d399] transition-colors w-full font-mono text-[#34d399] placeholder-[#34d399]/30">
       </div>
     </div>
-    <div class="edit-hide flex flex-col gap-1.5 mb-4"><label class="text-[0.65rem] font-medium text-slate-400 tracking-wider uppercase">Cuenta / Destino</label>
-        <input type="text" id="mpCuenta" placeholder="Caja, BBVA..." class="bg-slate-800 border border-slate-700 rounded-md text-slate-200 text-[0.82rem] px-3 py-2 outline-none focus:border-[#34d399] transition-colors w-full">
-    </div>
     <div class="edit-hide flex flex-col gap-1.5 mb-1">
       <label class="text-[0.65rem] font-medium text-slate-400 tracking-wider uppercase">Esquema</label>
       <select id="mpEsquema" class="bg-slate-800 border border-slate-700 rounded-md text-slate-200 text-[0.82rem] px-3 py-2 outline-none focus:border-[#34d399] transition-colors w-full" onchange="toggleEsquemaOtro()">
@@ -289,8 +287,11 @@
         <option value="Otros">Otros</option>
       </select>
     </div>
-    <div class="edit-hide hidden flex flex-col gap-1.5" id="mpEsquemaOtroWrap">
+    <div class="edit-hide hidden flex flex-col gap-1.5 mb-1" id="mpEsquemaOtroWrap">
       <input type="text" id="mpEsquemaOtro" placeholder="Especifica el esquema..." class="bg-slate-800 border border-slate-700 rounded-md text-slate-200 text-[0.82rem] px-3 py-2 outline-none focus:border-[#34d399] transition-colors w-full">
+    </div>
+    <div class="edit-hide flex flex-col gap-1.5 mb-4 mt-3"><label class="text-[0.65rem] font-medium text-slate-400 tracking-wider uppercase">Cuenta / Destino</label>
+        <input type="text" id="mpCuenta" placeholder="Caja, BBVA..." class="bg-slate-800 border border-slate-700 rounded-md text-slate-200 text-[0.82rem] px-3 py-2 outline-none focus:border-[#34d399] transition-colors w-full">
     </div>
 
     <div class="flex gap-2 justify-end mt-7 pt-5 border-t border-slate-800">

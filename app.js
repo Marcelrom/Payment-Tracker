@@ -434,7 +434,7 @@ function renderClients(){
   let html='';
 
   for(const cli of clients){
-    const recs=data.filter(r=>r.cliente===cli);
+    const recs=data.filter(r=>r.cliente===cli).sort((a,b)=>(a.fecha_factura||'').localeCompare(b.fecha_factura||''));
     const col=cc(cli);
     const ctp=recs.filter(r=>isApproved(r)).reduce((s,r)=>s+r.monto_pagar,0);
     const cpd=recs.filter(r=>isApproved(r)).reduce((s,r)=>s+paid(r),0);
@@ -449,8 +449,8 @@ function renderClients(){
           <span class="font-mono text-[0.62rem] text-slate-500">${recs.length} factura(s) · ${cp2.toFixed(0)}% cobrado</span>
         </div>
         <div class="flex gap-1.5">
-          <button class="text-[0.7rem] font-medium px-3 py-1 rounded-md text-slate-400 border border-slate-700/50 hover:bg-slate-800 hover:text-white transition-colors" onclick="openRenameClient('${cli}')">
-            <svg class="w-3.5 h-3.5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>Editar
+          <button class="text-[0.7rem] font-medium px-3 py-1 rounded-md text-[#4f9cf9] border border-[#4f9cf9]/30 hover:bg-[#4f9cf9]/10 hover:text-white transition-colors" onclick="openNuevaFacturaParaCliente('${cli}')">
+            <svg class="w-3.5 h-3.5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>Nueva Factura
           </button>
           <button class="text-[0.7rem] font-medium px-3 py-1 rounded-md text-rose-400 border border-rose-500/20 hover:bg-rose-500/10 hover:text-rose-300 transition-colors" onclick="delCliente('${cli}')">
             <svg class="w-3.5 h-3.5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>Borrar Cliente
@@ -527,14 +527,7 @@ function renderClients(){
         </div>`;
     }
 
-    // Button to add new invoice for this client (at the bottom of the client card)
-    html+=`
-        <button class="w-full text-[0.72rem] font-medium py-2.5 rounded-lg text-[#4f9cf9]/70 border border-dashed border-[#4f9cf9]/20 hover:border-[#4f9cf9]/50 hover:text-[#4f9cf9] hover:bg-[#4f9cf9]/5 transition-colors flex items-center justify-center gap-1.5" onclick="openNuevaFacturaParaCliente('${cli}')">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-          Nueva Factura para ${cli}
-        </button>
-      </div>
-    </div>`;
+    html+=`</div></div>`;
   }
 
   document.getElementById('clientesGrouped').innerHTML = html || '<div class="text-center text-slate-500 py-12">No hay clientes registrados.</div>';
@@ -892,17 +885,48 @@ window.rejectRec = async function(id){
 };
 
 function updatePendingBadge(){
-  const pendingCount = data.filter(r=>isPending(r)).length;
+  if(!isAdmin()){ document.getElementById('pendingBadge').classList.add('hidden'); return; }
+
+  const pendingRecs = data.filter(r => isPending(r));
+
+  // Distinguish: client pending = no other approved record for that client
+  //              invoice pending = client already has approved records
+  const approvedClients = new Set(data.filter(r => isApproved(r)).map(r => r.cliente));
+  let pendingClientes = 0, pendingFacturas = 0;
+  for(const r of pendingRecs){
+    if(approvedClients.has(r.cliente)) pendingFacturas++;
+    else pendingClientes++;
+  }
+
+  // Pending payments within any invoice
+  let pendingPagos = 0;
+  for(const r of data){
+    pendingPagos += r.pagos.filter(p => p.estado==='pendiente' || p.estado==='pendiente_borrar').length;
+  }
+
+  const total = pendingClientes + pendingFacturas + pendingPagos;
   const badge = document.getElementById('pendingBadge');
-  if(isAdmin() && pendingCount > 0){
+
+  if(total > 0){
     badge.classList.remove('hidden');
     badge.classList.add('flex');
-    document.getElementById('pendingCount').textContent = pendingCount;
+    const parts = [];
+    if(pendingClientes > 0) parts.push(`Clientes (${pendingClientes})`);
+    if(pendingFacturas > 0) parts.push(`Facturas (${pendingFacturas})`);
+    if(pendingPagos > 0)    parts.push(`Pagos (${pendingPagos})`);
+    document.getElementById('pendingSummary').textContent = parts.join(' · ');
   } else {
     badge.classList.add('hidden');
     badge.classList.remove('flex');
   }
 }
+
+// Click badge: go to Clientes if facturas pending, else Pagos
+window.pendingBadgeClick = function(){
+  const pendingRecs = data.filter(r => isPending(r)).length;
+  const tab = pendingRecs > 0 ? 'clientes' : 'pagos';
+  showPage(document.querySelector(`[data-page=${tab}]`));
+};
 
 // ══════════════════════════════════════════════════════════════════════════
 // PAGOS MODAL
