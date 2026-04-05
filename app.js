@@ -516,6 +516,9 @@ function renderClients(){
           <div class="flex items-center justify-between pt-2 border-t border-slate-700/30">
             <span class="font-mono text-[0.6rem] text-slate-500">${numPagos} pago(s) registrado(s)</span>
             <div class="flex items-center gap-1.5">
+              <button class="text-[0.68rem] font-medium px-2.5 py-1 rounded-md text-slate-400 border border-slate-700/50 hover:bg-slate-700/50 transition-colors flex items-center gap-1" onclick="verPagos('${rec.id}')">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>Ver Pagos
+              </button>
               <button class="text-[0.68rem] font-medium px-2.5 py-1 rounded-md text-[#34d399] border border-[#34d399]/25 hover:bg-[#34d399]/10 transition-colors flex items-center gap-1" onclick="openPago('${rec.id}')">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>Agregar Pago
               </button>
@@ -622,18 +625,68 @@ window.renderTable = function(){
 // ══════════════════════════════════════════════════════════════════════════
 
 window.closeModals = function(){
-  ['ovFactura','ovPago','ovPassword','ovRenameClient'].forEach(id => {
+  ['ovFactura','ovPago','ovPassword','ovRenameClient','ovVerPagos'].forEach(id => {
     document.getElementById(id).classList.add('hidden');
     document.getElementById(id).classList.remove('flex');
   });
   editFacId=null;
   editClientName=null;
+  _verPagosFacturaId=null;
 };
 
 // Click outside closes modals
-['ovFactura','ovPago','ovPassword','ovRenameClient'].forEach(id => {
+['ovFactura','ovPago','ovPassword','ovRenameClient','ovVerPagos'].forEach(id => {
   document.getElementById(id).addEventListener('click',e=>{if(e.target===e.currentTarget)window.closeModals();});
 });
+
+// ── HISTORIAL DE PAGOS MODAL ──────────────────────────────────────────────
+window.verPagos = function(idFactura){
+  const rec = data.find(r=>r.id===idFactura);
+  if(!rec) return;
+  _verPagosFacturaId = idFactura;
+
+  document.getElementById('vpTitle').textContent = `${rec.factura} · ${rec.cliente}`;
+
+  const pagos = rec.pagos || [];
+  if(!pagos.length){
+    document.getElementById('vpBody').innerHTML =
+      `<tr><td colspan="6" class="text-center py-8 text-slate-500 text-sm">Sin pagos registrados.</td></tr>`;
+  } else {
+    document.getElementById('vpBody').innerHTML = pagos.map((p,i)=>{
+      const isPend    = p.estado==='pendiente';
+      const isPendDel = p.estado==='pendiente_borrar';
+      const estadoBadge = isPendDel
+        ? '<span class="text-[0.58rem] font-bold px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-400 border border-rose-500/20">Borrado pendiente</span>'
+        : isPend
+        ? '<span class="text-[0.58rem] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/20">Pendiente</span>'
+        : '<span class="text-[0.58rem] font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">Aprobado</span>';
+      const esquema = p.esquema
+        ? `<span class="text-[0.58rem] font-medium px-1.5 py-0.5 rounded bg-[#a78bfa]/10 text-[#a78bfa] border border-[#a78bfa]/20 whitespace-nowrap">${p.esquema}</span>`
+        : '<span class="text-slate-600 text-[0.65rem]">--</span>';
+      return `
+      <tr class="border-b border-slate-800/50 hover:bg-[#4f9cf9]/5 transition-colors group">
+        <td class="px-3 py-2.5 font-mono text-[0.68rem] text-slate-300 whitespace-nowrap">${fmtD(p.fecha)}</td>
+        <td class="px-3 py-2.5 font-mono text-[0.68rem] text-[#34d399] font-medium text-right whitespace-nowrap">${fmt(p.monto)}</td>
+        <td class="px-3 py-2.5">${esquema}</td>
+        <td class="px-3 py-2.5 text-[0.68rem] text-slate-400">${p.cuenta||'--'}</td>
+        <td class="px-3 py-2.5">${estadoBadge}</td>
+        <td class="px-3 py-2.5 text-right whitespace-nowrap">
+          <div class="flex items-center justify-end gap-1">
+            <button class="inline-flex items-center justify-center bg-[#4f9cf9]/10 text-[#4f9cf9] border border-[#4f9cf9]/30 hover:bg-[#4f9cf9] hover:text-white px-2 py-1 rounded transition-colors h-[24px] opacity-0 group-hover:opacity-100" onclick="editPago('${idFactura}',${i})" title="Editar">
+              <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+            </button>
+            <button class="inline-flex items-center justify-center bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500 hover:text-white px-2 py-1 rounded transition-colors h-[24px] opacity-0 group-hover:opacity-100" onclick="deletePagoEspecifico('${idFactura}',${i})" title="Borrar">
+              <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('ovVerPagos').classList.remove('hidden');
+  document.getElementById('ovVerPagos').classList.add('flex');
+};
 
 // ── FACTURA MODAL HELPERS ──
 function populateCliSelect(selectedValue=''){
@@ -1019,7 +1072,8 @@ window.loadPaymentsList = function() {
 
 // ── EDIT PAGO MODAL ──────────────────────────────────────────────────────
 let _editPagoFacturaId = null;
-let _editPagoIndex = null;
+let _editPagoIndex     = null;
+let _verPagosFacturaId = null;
 
 window.toggleEpEsquemaOtro = function(){
   const val = document.getElementById('epEsquema').value;
@@ -1112,6 +1166,7 @@ window.saveEditPago = async function(){
   window.closeEditPago();
   if(document.getElementById('ovPago').classList.contains('flex')) window.loadPaymentsList();
   window.renderTable();
+  if(_verPagosFacturaId && document.getElementById('ovVerPagos').classList.contains('flex')) window.verPagos(_verPagosFacturaId);
 };
 
 window.deletePagoEspecifico = async function(idFactura, indexPago) {
@@ -1130,6 +1185,7 @@ window.deletePagoEspecifico = async function(idFactura, indexPago) {
     toast('Solicitud de borrado enviada. Pendiente de aprobacion.','tok');
   }
   if(document.getElementById('ovPago').classList.contains('flex')) window.loadPaymentsList();
+  if(_verPagosFacturaId && document.getElementById('ovVerPagos').classList.contains('flex')) window.verPagos(_verPagosFacturaId);
 };
 
 window.approvePago = async function(idFactura, indexPago) {
