@@ -608,15 +608,15 @@ window.renderTable = function(){
 
     return `
     <tr class="border-b border-slate-800/50 hover:bg-[#4f9cf9]/5 transition-colors group ${(isPend||isPendDel)?'opacity-60':''}">
-      <td class="px-4 py-3 align-middle"><span class="text-[0.65rem] font-bold px-2 py-0.5 rounded" style="background:rgba(${h2rgb(col)},.15);color:${col}">${r.cliente}</span></td>
-      <td class="px-4 py-3 align-middle font-mono text-[0.7rem] text-slate-300">${r.factura||'--'}</td>
-      <td class="px-4 py-3 align-middle font-mono text-[0.7rem] text-slate-400 whitespace-nowrap">${fmtD(p.fecha)}</td>
-      <td class="px-4 py-3 align-middle font-mono text-[0.7rem] text-[#34d399] font-medium whitespace-nowrap text-right">${fmt(p.monto)}</td>
-      <td class="px-4 py-3 align-middle text-[0.7rem] text-slate-400">${p.cuenta||'--'}</td>
-      <td class="px-4 py-3 align-middle">${esquemaBadge}</td>
-      <td class="px-4 py-3 align-middle font-mono text-[0.65rem] text-slate-500">${p.creado_por||'admin'}</td>
-      <td class="px-4 py-3 align-middle">${estadoBadge}</td>
-      <td class="px-4 py-3 align-middle whitespace-nowrap text-right">
+      <td data-label="Cliente" class="px-4 py-3 align-middle"><span class="text-[0.65rem] font-bold px-2 py-0.5 rounded" style="background:rgba(${h2rgb(col)},.15);color:${col}">${r.cliente}</span></td>
+      <td data-label="Factura" class="px-4 py-3 align-middle font-mono text-[0.7rem] text-slate-300">${r.factura||'--'}</td>
+      <td data-label="Fecha Pago" class="px-4 py-3 align-middle font-mono text-[0.7rem] text-slate-400 whitespace-nowrap">${fmtD(p.fecha)}</td>
+      <td data-label="Monto" class="px-4 py-3 align-middle font-mono text-[0.7rem] text-[#34d399] font-medium whitespace-nowrap text-right">${fmt(p.monto)}</td>
+      <td data-label="Cuenta" class="px-4 py-3 align-middle text-[0.7rem] text-slate-400">${p.cuenta||'--'}</td>
+      <td data-label="Esquema" class="px-4 py-3 align-middle">${esquemaBadge}</td>
+      <td data-label="Creado por" class="px-4 py-3 align-middle font-mono text-[0.65rem] text-slate-500">${p.creado_por||'admin'}</td>
+      <td data-label="Estado" class="px-4 py-3 align-middle">${estadoBadge}</td>
+      <td data-label="Acciones" class="px-4 py-3 align-middle whitespace-nowrap text-right">
         <div class="flex items-center justify-end gap-1">
           ${approveHtml}
           <button class="inline-flex items-center justify-center bg-[#4f9cf9]/10 text-[#4f9cf9] border border-[#4f9cf9]/30 hover:bg-[#4f9cf9] hover:text-white font-bold px-2 py-1 rounded transition-colors h-[26px] opacity-0 group-hover:opacity-100" onclick="editPago('${r.id}',${i})" title="Editar monto">

@@ -33,6 +33,66 @@
         ::-webkit-scrollbar-track { background: #131929; }
         ::-webkit-scrollbar-thumb { background: #2c3d5a; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #3d5278; }
+
+        /* ================= RESPONSIVE (MOBILE) ================= */
+        @media (max-width: 768px) {
+          /* Modales: altura maxima y scroll interno en movil */
+          .fixed.inset-0 > div { max-height: 92vh; overflow-y: auto; }
+
+          /* Tabla de Pagos → tarjetas apiladas */
+          #page-pagos table,
+          #page-pagos tbody,
+          #page-pagos tbody tr,
+          #page-pagos tbody td { display: block; width: 100%; }
+          #page-pagos thead { display: none; }
+          #page-pagos table { min-width: 0 !important; }
+          #page-pagos .overflow-x-auto { overflow-x: visible; }
+          #page-pagos tbody tr {
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            margin: 12px 10px;
+            padding: 10px 14px;
+            background: #0f1524;
+          }
+          #page-pagos tbody td {
+            border: none !important;
+            padding: 7px 0 !important;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            text-align: right !important;
+            min-height: 28px;
+            white-space: normal !important;
+          }
+          #page-pagos tbody td::before {
+            content: attr(data-label);
+            font-family: 'DM Mono', monospace;
+            font-size: 0.58rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #64748b;
+            flex-shrink: 0;
+            text-align: left;
+          }
+          #page-pagos tbody td:last-child {
+            border-top: 1px solid #1e293b !important;
+            margin-top: 6px;
+            padding-top: 10px !important;
+            justify-content: flex-end;
+          }
+          #page-pagos tbody td:last-child::before { display: none; }
+          #page-pagos tbody td[colspan]::before { display: none; }
+          #page-pagos tbody td[colspan] { justify-content: center; text-align: center !important; }
+          /* Acciones siempre visibles en movil (no hay hover) */
+          #page-pagos tbody .group-hover\:opacity-100 { opacity: 1 !important; }
+
+          /* Header: reducir chip de sync en movil */
+          #syncStatus span { display: none; }
+
+          /* Tabs: permitir scroll horizontal si hace falta */
+          .tab { font-size: 0.72rem !important; padding: 0.4rem 0.75rem !important; }
+        }
     </style>
 </head>
 <body class="min-h-screen font-sans selection:bg-[#4f9cf9]/30">
@@ -77,7 +137,7 @@
 <div id="appMain" class="hidden">
 
 <header class="border-b border-slate-800 bg-[#0b0f18]/90 backdrop-blur-md sticky top-0 z-[200]">
-  <div class="max-w-[1340px] mx-auto px-7 py-4 flex items-center justify-between gap-4">
+  <div class="max-w-[1340px] mx-auto px-4 sm:px-7 py-4 flex flex-wrap items-center justify-between gap-2 sm:gap-4">
     <div class="font-serif text-xl tracking-tight text-slate-100">Control<em class="text-[#4f9cf9] not-italic">.</em>Pagos<span class="font-mono text-[0.68rem] text-slate-500 align-middle ml-1.5">2026</span></div>
     <div class="flex gap-2.5 items-center">
       <div id="syncStatus" class="flex items-center gap-1.5 font-mono text-[0.65rem] px-2.5 py-1 rounded-md border text-slate-300 border-slate-700/50 bg-slate-800/40">
@@ -123,7 +183,7 @@
   </div>
 </header>
 
-<div class="max-w-[1340px] mx-auto px-7 relative z-10 pb-20">
+<div class="max-w-[1340px] mx-auto px-4 sm:px-7 relative z-10 pb-20">
   <!-- Tabs -->
   <div class="flex gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1 w-fit mt-7 mb-6">
     <button class="tab text-[0.78rem] font-semibold px-4 py-2 rounded-lg transition-all bg-slate-800 text-white shadow-md shadow-black/20" data-page="dashboard" onclick="showPage(this)">◈ Dashboard</button>
